@@ -17,29 +17,15 @@
                 .filter(line => line.length > 0)
         };
 
-        // A group of size N has probability of 1/N of being picked. This leaves
-        // the individual’s probability invariant under the size of the group
-        // they are participating in.
-        const weight = group => { return 1 / group.length };
-
-        // Borked if nothing is found but this is JS so who cares because such flexibility
         const findAndSplit = (list, p) => {
             const ix = list.findIndex(p);
             if(ix < 0) {
                 throw new Error("findAndSplit: nothing found");
-            } else if(ix === list.length-1) {
-                const before = list.slice(0, ix);
-                const after = []
-                return [before, list[ix], after];
-            } else if(ix === 0) {
-                const before = [];
-                const after = list.slice(1);
-                return [before, list[ix], after];
-            } else {
-                const before = list.slice(0, ix);
-                const after = list.slice(-ix);
-                return [before, list[ix], after]
             }
+
+            const before = list.slice(0, ix);
+            const after = list.slice(ix+1, list.length);
+            return [before, list[ix], after]
         }
 
         const testFindAndSplit = () => {
@@ -49,7 +35,7 @@
                 console.assert(lolJsArrayEqual([...before, x, ...after], input), before, x, after);
             }
             list = [1,2,3,4,5,6,7,8,9];
-            splitAndReassemble(list, x => x >= 5); // Happy path
+            splitAndReassemble(list, x => x >= 3); // Happy path
             splitAndReassemble(list, x => x == 1); // First element
             splitAndReassemble(list, x => x == 9); // Last element
         }
@@ -57,6 +43,12 @@
 
 
         const pickRandomGroup = groups => {
+
+            // A group of size N has probability of 1/N of being picked. This leaves
+            // the individual’s probability invariant under the size of the group
+            // they are participating in.
+            const weight = group => { return 1 / group.length };
+
             var cumulativeWeight = 0;
             const weightedGroups = groups.map(group => {
                 cumulativeWeight += weight(group);
@@ -69,18 +61,28 @@
             const totalWeight = cumulativeWeight;
             const threshold = Math.random() * totalWeight;
             const [before, winner, after] = findAndSplit(weightedGroups, group => threshold <= group.cWeight);
-            return [winner.participants, before.concat(after)]
+            const losers = before.concat(after);
+            return { winner: winner.participants, rest: losers.map(loser => loser.participants) }
         }
 
         const roll = (groups, maxParticipants) => {
-            console.log(pickRandomGroup(groups));
+            var participants = 0;
+            var unpickedGroups = groups;
+            var winners = []
+            while(participants < maxParticipants && unpickedGroups.length > 0) {
+                const { winner, rest } = pickRandomGroup(unpickedGroups);
+                unpickedGroups = rest;
+                participants += winner.length;
+                winners.push(winner);
+                console.log("winner", winner, "rest", rest);
+            }
         };
 
         const main = () => {
             const box = document.getElementById("input");
             const rawInput = box.value;
             const groups = parseGroups(rawInput);
-            roll(groups, 5);
+            roll(groups, 4);
         }
     </script>
 </head>
