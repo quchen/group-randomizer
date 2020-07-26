@@ -24,10 +24,21 @@
 
         const findAndSplit = (list, p) => {
             const ix = list.findIndex(p);
-            const before = list.splice(0, ix-1);
-            const after = list.splice(-ix);
+            const before = list.slice(0, ix);
+            const after = list.slice(-ix);
             return [before, list[ix], after]
         }
+
+        const testFindAndSplit = () => {
+            const lolJsArrayEqual = (xs, ys) => xs.length === ys.length && xs.every((value, index) => value === ys[index])
+            const splitAndReassemble = (input, p) => {
+                const [before, x, after] = findAndSplit(input, p);
+                console.assert(lolJsArrayEqual([...before, x, ...after], input), before, x, after);
+            }
+            splitAndReassemble([1,2,3,4,5,6,7,8,9], x => x == 5);
+        }
+        testFindAndSplit();
+
 
         const pickRandomGroup = groups => {
             var cumulativeWeight = 0;
@@ -40,10 +51,9 @@
                 }
             });
             const totalWeight = cumulativeWeight;
-            const random = Math.random() * totalWeight;
-            const [before, winner, after] = findAndSplit(weightedGroups, group => random <= group.cWeight);
-
-            return [winningEntry.participants, rest]
+            const threshold = Math.random() * totalWeight;
+            const [before, winner, after] = findAndSplit(weightedGroups, group => threshold <= group.cWeight);
+            return [winner.participants, before.concat(after)]
         }
 
         const roll = (groups, maxParticipants) => {
