@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <title>Group Randomizer</title>
     <script type="text/javascript">
         const parseGroups = rawInput => {
 
@@ -44,9 +45,9 @@
 
         const pickRandomGroup = groups => {
 
-            // A group of size N has probability of 1/N of being picked. This leaves
-            // the individual’s probability invariant under the size of the group
-            // they are participating in.
+            // A group of size N has probability of 1/N of being picked. This
+            // leaves the individual’s probability invariant under the size of
+            // the group they are participating in.
             const weight = group => { return 1 / group.length };
 
             var cumulativeWeight = 0;
@@ -74,17 +75,33 @@
                 unpickedGroups = rest;
                 participants += winner.length;
                 winners.push(winner);
-                console.log("winner", winner, "rest", rest);
             }
+            return winners;
+        };
+
+        const displayResult = winners => {
+            document.getElementById("output").value = winners.map(group => group.join(", ")).join("\n");
         };
 
         const main = () => {
-            const box = document.getElementById("input");
-            const rawInput = box.value;
+            const input = document.getElementById("input");
+            const rawInput = input.value;
             const groups = parseGroups(rawInput);
-            roll(groups, 4);
+            const winners = roll(groups, 4);
+
+            displayResult(winners);
         }
     </script>
+    <style media="screen">
+        body {
+            margin: 0 auto;
+            max-width: 80ex;
+        }
+        textarea {
+            width: 100%;
+            display: block;
+        }
+    </style>
 </head>
 <body>
 <h1>Group Randomizer</h1>
@@ -106,12 +123,13 @@ following properties:</p>
 
 <p>The input format is simple: Each line is a group, with members separated by commas.</p>
 
-<textarea id="input" cols="80" rows="20">
+<textarea id="input" rows="20">
 David, Andor, Johannes
 Janina, Mikey
 Annika, Maria, Raphi
 Vincent
 </textarea>
 <button onclick="main()">Go</button>
+<textarea id="output" rows="20">Winners will display here</textarea>
 </body>
 </html>
