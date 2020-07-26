@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript">
+        const parseGroups = rawInput => {
+
+            const cleanEntry = x => {
+                return x.trim();
+            };
+
+            return rawInput
+                .split("\n")
+                .map(line => line.split(","))
+                .map(line => line.map(entry => cleanEntry(entry)))
+                .map(line => line.filter(entry => entry.length > 0))
+                .filter(line => line.length > 0)
+        };
+
+        // A group of size N has probability of 1/N of being picked. This leaves
+        // the individual’s probability invariant under the size of the group
+        // they are participating in.
+        const weight = group => { return 1 / group.length };
+
+        const findAndSplit = (list, p) => {
+            const ix = list.findIndex(p);
+            const before = list.splice(0, ix-1);
+            const after = list.splice(-ix);
+            return [before, list[ix], after]
+        }
+
+        // Durstenfeld shuffle, https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
+        const shuffleArray = array => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        const pickRandomGroup = groups => {
+            var cumulativeWeight = 0;
+            const weightedGroups = groups.map(group => {
+                cumulativeWeight += weight(group);
+                return {
+                    gWeight: weight(group),
+                    cWeight: cumulativeWeight,
+                    participants: group
+                }
+            });
+            const totalWeight = cumulativeWeight;
+            const random = Math.random() * totalWeight;
+            const [before, winner, after] = findAndSplit(weightedGroups, group => random <= group.cWeight);
+
+            return [winningEntry.participants, rest]
+        }
+
+        const roll = (groups, maxParticipants) => {
+            console.log(pickRandomGroup(groups));
+        };
+
+        const main = () => {
+            const box = document.getElementById("input");
+            const rawInput = box.value;
+            const groups = parseGroups(rawInput);
+            roll(groups, 5);
+        }
+    </script>
+</head>
+<body>
+    <textarea id="input" cols="80" rows="20">
+    David, Andor, Johannes
+    Janina, Mikey
+    Annika, Maria, Raphi
+    Vincent
+    </textarea>
+    <button onclick="main()">Go</button>
+</body>
+</html>
