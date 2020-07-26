@@ -87,12 +87,31 @@
     </script>
 </head>
 <body>
-    <textarea id="input" cols="80" rows="20">
-    David, Andor, Johannes
-    Janina, Mikey
-    Annika, Maria, Raphi
-    Vincent
-    </textarea>
-    <button onclick="main()">Go</button>
+<h1>Group Randomizer</h1>
+
+<p>Suppose you’re hosting an event with limited slots, while also allowing
+friends to sign up together. The naive solution always has the problem that
+being in a group changes each person’s winning probability: it’s either way
+higher or way lower, depending on the group size.</p>
+
+<p>This script was inspired by the Fusion Festival’s randomizer, and has the
+following properties:</p>
+
+<ul>
+    <li>Pick random winners</li>
+    <li>Allow friends to sign up together</li>
+    <li>Don’t split up friend groups</li>
+    <li>No disadvantage for being in a group</li>
+</ul>
+
+<p>The input format is simple: Each line is a group, with members separated by commas.</p>
+
+<textarea id="input" cols="80" rows="20">
+David, Andor, Johannes
+Janina, Mikey
+Annika, Maria, Raphi
+Vincent
+</textarea>
+<button onclick="main()">Go</button>
 </body>
 </html>
