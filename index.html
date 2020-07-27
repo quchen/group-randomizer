@@ -11,6 +11,7 @@
             };
 
             return rawInput
+                .replace("\r", "")
                 .split("\n")
                 .map(line => line.split(","))
                 .map(line => line.map(entry => cleanEntry(entry)))
@@ -42,7 +43,6 @@
         }
         testFindAndSplit();
 
-
         const pickRandomGroup = groups => {
 
             // A group of size N has probability of 1/N of being picked. This
@@ -54,7 +54,6 @@
             const weightedGroups = groups.map(group => {
                 cumulativeWeight += weight(group);
                 return {
-                    gWeight: weight(group),
                     cWeight: cumulativeWeight,
                     participants: group
                 }
@@ -73,21 +72,28 @@
             while(participants < maxParticipants && unpickedGroups.length > 0) {
                 const { winner, rest } = pickRandomGroup(unpickedGroups);
                 unpickedGroups = rest;
-                participants += winner.length;
-                winners.push(winner);
+
+                // Winner does not fit, but we can retry rolling without them
+                if(participants + winner.length > maxParticipants) {
+                    continue;
+                // Enough space to fit winner
+                } else {
+                    participants += winner.length;
+                    winners.push(winner);
+                }
             }
             return winners;
         };
 
         const displayResult = winners => {
-            document.getElementById("output").value = winners.map(group => group.join(", ")).join("\n");
+            const outputValue = winners.map(group => group.join(", ")).join("\n");
+            document.getElementById("output").value = outputValue;
         };
 
         const main = () => {
-            const input = document.getElementById("input");
-            const rawInput = input.value;
-            const groups = parseGroups(rawInput);
-            const winners = roll(groups, 4);
+            const groups = parseGroups(document.getElementById("inputGroups").value);
+            const maxParticipants = document.getElementById("maxParticipants").value;
+            const winners = roll(groups, maxParticipants);
 
             displayResult(winners);
         }
@@ -117,19 +123,31 @@ following properties:</p>
 <ul>
     <li>Pick random winners</li>
     <li>Allow friends to sign up together</li>
-    <li>Don’t split up friend groups</li>
     <li>No disadvantage for being in a group</li>
 </ul>
 
-<p>The input format is simple: Each line is a group, with members separated by commas.</p>
+<p>The input format is simple: Each line is a group, with members separated by
+commas.</p>
 
-<textarea id="input" rows="20">
+<div>
+    <label for="maxParticipants">Maximum number of participants</label>
+    <input type="number" id="maxParticipants" name="maxParticipants" min="1" value="3">
+</div>
+<div>
+    <label for="inputGroups">Groups</label>
+    <textarea id="inputGroups" name="inputGroups" rows="20">
 David, Andor, Johannes
 Janina, Mikey
 Annika, Maria, Raphi
 Vincent
 </textarea>
-<button onclick="main()">Go</button>
-<textarea id="output" rows="20">Winners will display here</textarea>
+</div>
+<div>
+    <button onclick="main()">Go</button>
+</div>
+<div>
+    <label for="output">Result</label>
+    <textarea id="output" name="output" rows="20">Winners will display here</textarea>
+</div>
 </body>
 </html>
